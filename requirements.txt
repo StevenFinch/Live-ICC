@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+apscheduler
+nest_asyncio
+pandas
+numpy
+yfinance
+aiohttp
+lxml
