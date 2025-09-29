@@ -1,0 +1,42 @@
+name: Build snapshot and deploy to GitHub Pages
+on:
+  push: { branches: [ main ] }
+  schedule:
+    - cron: "0 * * * *"   # hourly; adjust as you like
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Build/refresh snapshot.json before publishing
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Install deps
+        run: |
+          python -m pip install -U pip
+          pip install -r requirements.txt
+      - name: Build snapshot.json
+        run: python scripts/make_snapshot.py
+
+      # Publish the static folder
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/public          # ← your site directory
+      - id: deployment
+        uses: actions/deploy-pages@v4
