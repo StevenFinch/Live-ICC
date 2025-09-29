@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>US-Market Implied Cost of Capital | LIVE</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Basic light theme (CSS variables) -->
+  <style>
+:root{
+  --bg:#f4f6fa;        /* page background               */
+  --card:#ffffff;      /* card background               */
+  --text:#111827;      /* primary text                  */
+  --muted:#6b7280;     /* secondary text                */
+  --accent:#2563eb;    /* accent blue                   */
+  --pos:#059669;       /* positive numbers              */
+  --neg:#dc2626;       /* negative numbers              */
+  --shadow:0 4px 10px rgba(0,0,0,.05);
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,system-ui,sans-serif}
+body{
+  background:var(--bg);
+  color:var(--text);
+  padding:2rem 1rem;
+  line-height:1.4;
+  min-height:100vh;
+}
+
+/* page title */
+h1{
+  font-size:clamp(1.6rem,4vw,2.1rem);
+  font-weight:600;
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+}
+#updated{font-size:.85rem;color:var(--muted);}
+
+/* section headings */
+section{margin-top:2.5rem}
+section>h2{
+  font-size:1.35rem;font-weight:600;
+  margin-bottom:1.1rem;
+  color:var(--accent);
+  border-left:4px solid var(--accent);
+  padding-left:.55rem;
+}
+
+/* responsive grid for cards */
+.grid{
+  display:grid;
+  gap:1rem;
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+}
+
+/* portfolio cards */
+.card{
+  background:var(--card);
+  border-radius:12px;
+  padding:1.2rem 1.25rem;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  gap:.55rem;
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+.card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 8px 20px rgba(0,0,0,.06);
+}
+.code{font-size:1.05rem;font-weight:600;text-transform:uppercase;letter-spacing:.02em}
+.n   {font-size:.8rem;color:var(--muted)}
+.kv  {display:flex;justify-content:space-between;font-size:.9rem}
+.kv span:first-child{color:var(--muted);}
+.pos{color:var(--pos)}
+.neg{color:var(--neg)}
+/* align numeric values right */
+.kv span:last-child{text-align:right;min-width:5ch;}
+  </style>
+
+  <!-- front-end script that calls /api/portfolios -->
+  <script defer src="icc.js"></script>
+</head>
+<body>
+  <h1>
+    Live Implied Cost of Capital<span id="updated"></span>
+  </h1>
+
+  <section id="sec-ind">
+    <h2>US-Market Indexes</h2><div class="grid"></div>
+  </section>
+
+  <section id="sec-bm">
+    <h2>Book-to-Market Buckets</h2><div class="grid"></div>
+  </section>
+
+  <section id="sec-sector">
+    <h2>Sectors</h2><div class="grid"></div>
+  </section>
+
+  <section id="sec-others">
+    <h2>Other Portfolios</h2><div class="grid"></div>
+  </section>
+</body>
+</html>
