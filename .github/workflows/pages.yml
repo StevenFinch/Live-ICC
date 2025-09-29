@@ -1,0 +1,47 @@
+# .github/workflows/pages.yml
+name: Build snapshot and deploy to GitHub Pages
+on:
+  schedule:
+    - cron: "0 * * * *"     # every hour
+  push:
+    branches: [ main ]      # also deploy on pushes
+  workflow_dispatch: {}     # manual run
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+
+      - name: Install deps
+        run: |
+          python -m pip install -U pip
+          pip install -r requirements.txt
+
+      - name: Build snapshot.json
+        run: python scripts/make_snapshot.py
+
+      - name: Prepare static site
+        run: |
+          mkdir -p _site
+          cp -r frontend/public/* _site/
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with: { path: _site }
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
