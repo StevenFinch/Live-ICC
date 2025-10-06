@@ -1,8 +1,10 @@
 name: Build snapshot and deploy to GitHub Pages
+
 on:
-  push: { branches: [ main ] }
+  push:
+    branches: [ main ]
   schedule:
-    - cron: "0 * * * *"   # hourly; adjust as you like
+    - cron: "0 * * * *"   # hourly; adjust as needed
   workflow_dispatch: {}
 
 permissions:
@@ -17,26 +19,56 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      # ---- Controls for scripts/make_snapshot.py ----
+      USALL_MAX: "5000"     # thousands of tickers for ALL; raise/lower as desired
+      PAUSE_EVERY: "25"
+      PAUSE_SEC: "0.6"
+      G_LONG: "0.04"
+      T_HORIZON: "15"
     steps:
       - uses: actions/checkout@v4
 
-      # Build/refresh snapshot.json before publishing
+      # Python setup + pip cache
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install deps
         run: |
           python -m pip install -U pip
           pip install -r requirements.txt
-      - name: Build snapshot.json
+
+      # Build/refresh snapshot.json BEFORE publishing
+      - name: Build snapshot.json (ALL = full US)
         run: python scripts/make_snapshot.py
+
+      # Make sure static site behaves well on Pages
+      - name: Ensure .nojekyll and 404
+        run: |
+          touch frontend/public/.nojekyll
+          if [ ! -f frontend/public/404.html ] && [ -f frontend/public/index.html ]; then
+            cp frontend/public/index.html frontend/public/404.html
+          fi
 
       # Publish the static folder
       - uses: actions/configure-pages@v5
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: frontend/public          # ← your site directory
+          path: frontend/public   # your site directory
+
       - id: deployment
         uses: actions/deploy-pages@v4
